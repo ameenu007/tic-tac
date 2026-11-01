@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Mini-Arcade</title>
+    <!-- Tailwind CSS for utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Retro Arcade Vibe -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .font-retro {
+            font-family: 'Press Start 2P', monospace;
+        }
+        .font-sans-custom {
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        /* Custom Neon & Retro FX */
+        .neon-border {
+            box-shadow: 0 0 10px #3b82f6, 0 0 20px #1d4ed8, inset 0 0 5px #3b82f6;
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 8px #ec4899, 0 0 16px #be185d;
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 8px #06b6d4, 0 0 16px #0e7490;
+        }
+        .arcade-card {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            border: 2px solid #38bdf8;
+            box-shadow: 6px 6px 0px #0284c7;
+        }
+        .arcade-btn {
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0 #1e293b;
+        }
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #1e293b;
+        }
+
+        /* Card Flip Animations */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans-custom min-h-screen flex flex-col justify-between select-none">
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-900 border-b-4 border-cyan-500 p-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl animate-pulse">🕹️</span>
+                <h1 class="font-retro text-lg md:text-xl text-cyan-400 neon-text-cyan tracking-wider">RETRO ARCADE</h1>
+            </div>
+            
+            <nav class="flex flex-wrap justify-center gap-2 md:gap-4 font-retro text-xs">
+                <button onclick="switchGame('tic-tac-toe')" id="nav-tic-tac-toe" class="nav-btn px-4 py-2 rounded bg-cyan-600 text-white hover:bg-cyan-500 arcade-btn">
+                    TIC-TAC-TOE
+                </button>
+                <button onclick="switchGame('memory')" id="nav-memory" class="nav-btn px-4 py-2 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 arcade-btn">
+                    MEMORY MATCH
+                </button>
+                <button onclick="switchGame('snake')" id="nav-snake" class="nav-btn px-4 py-2 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 arcade-btn">
+                    SNAKE
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl w-full mx-auto p-4 flex-grow flex flex-col items-center justify-center">
+
+        <!-- GAME 1: TIC-TAC-TOE -->
+        <section id="game-tic-tac-toe" class="game-section w-full max-w-lg flex flex-col items-center">
+            <div class="arcade-card w-full p-6 rounded-xl text-center">
+                <h2 class="font-retro text-pink-500 neon-text-pink text-xl mb-2">TIC-TAC-TOE</h2>
+                <p class="text-slate-400 text-sm mb-4">Get 3 in a row to win against your friend or AI!</p>
+                
+                <!-- Game Controls & Scoreboard -->
+                <div class="flex justify-between items-center mb-6 bg-slate-900/80 p-3 rounded-lg border border-slate-700">
+                    <div class="text-center">
+                        <span class="block font-retro text-xs text-cyan-400">PLAYER X</span>
+                        <span id="ttt-score-x" class="font-retro text-lg text-white">0</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block font-retro text-xs text-pink-400">PLAYER O</span>
+                        <span id="ttt-score-o" class="font-retro text-lg text-white">0</span>
+                    </div>
+                    <button id="ttt-mode-btn" onclick="toggleTTTMode()" class="px-3 py-1 bg-purple-600 text-xs font-retro rounded hover:bg-purple-500 transition">
+                        VS AI
+                    </button>
+                </div>
+
+                <!-- Status Message -->
+                <div id="ttt-status" class="font-retro text-sm text-yellow-400 mb-4 h-6">Player X's Turn</div>
+
+                <!-- Board -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-800 p-3 rounded-xl border border-slate-700 aspect-square max-w-xs mx-auto">
+                    <button onclick="makeTTTMove(0)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(1)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(2)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(3)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(4)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(5)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(6)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(7)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                    <button onclick="makeTTTMove(8)" class="ttt-cell h-24 bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center font-retro text-4xl font-bold text-cyan-400 transition"></button>
+                </div>
+
+                <!-- Reset Button -->
+                <button onclick="resetTTT()" class="mt-6 px-6 py-2 bg-pink-600 hover:bg-pink-500 font-retro text-xs rounded-lg arcade-btn">
+                    RESET GAME
+                </button>
+            </div>
+        </section>
+
+        <!-- GAME 2: MEMORY MATCH -->
+        <section id="game-memory" class="game-section hidden w-full max-w-2xl flex flex-col items-center">
+            <div class="arcade-card w-full p-6 rounded-xl text-center">
+                <h2 class="font-retro text-pink-500 neon-text-pink text-xl mb-2">MEMORY MATCH</h2>
+                <p class="text-slate-400 text-sm mb-4">Match all pairs in the fewest moves possible!</p>
+                
+                <!-- Scoreboard -->
+                <div class="flex justify-around items-center mb-6 bg-slate-900/80 p-3 rounded-lg border border-slate-700 font-retro text-xs">
+                    <div>MOVES: <span id="memory-moves" class="text-cyan-400">0</span></div>
+                    <div>PAIRS: <span id="memory-pairs" class="text-pink-400">0 / 8</span></div>
+                    <div>BEST: <span id="memory-best" class="text-yellow-400">-</span></div>
+                </div>
+
+                <!-- Memory Grid -->
+                <div id="memory-grid" class="grid grid-cols-4 gap-3 max-w-md mx-auto">
+                    <!-- Cards dynamically generated here -->
+                </div>
+
+                <!-- Reset Button -->
+                <button onclick="initMemoryGame()" class="mt-6 px-6 py-2 bg-pink-600 hover:bg-pink-500 font-retro text-xs rounded-lg arcade-btn">
+                    NEW GAME
+                </button>
+            </div>
+        </section>
+
+        <!-- GAME 3: SNAKE -->
+        <section id="game-snake" class="game-section hidden w-full max-w-lg flex flex-col items-center">
+            <div class="arcade-card w-full p-6 rounded-xl text-center flex flex-col items-center">
+                <h2 class="font-retro text-pink-500 neon-text-pink text-xl mb-2">SNAKE CLASSIC</h2>
+                <p class="text-slate-400 text-sm mb-4">Use Arrow keys or Touch buttons to eat food!</p>
+
+                <!-- Score Board -->
+                <div class="flex justify-between w-full mb-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 font-retro text-xs">
+                    <div>SCORE: <span id="snake-score" class="text-cyan-400">0</span></div>
+                    <div>HIGH SCORE: <span id="snake-high" class="text-yellow-400">0</span></div>
+                </div>
+
+                <!-- Game Canvas Container -->
+                <div class="relative border-4 border-slate-700 rounded-lg overflow-hidden bg-black">
+                    <canvas id="snakeCanvas" width="360" height="360" class="block max-w-full h-auto"></canvas>
+                    
+                    <!-- Overlay Start/Game Over Screen -->
+                    <div id="snake-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center font-retro gap-4">
+                        <p id="snake-message" class="text-yellow-400 text-sm text-center px-4">PRESS START TO PLAY</p>
+                        <button onclick="startSnakeGame()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-xs rounded-lg arcade-btn text-white">
+                            START GAME
+                        </button>
+                    </div>
+                </div>
+
+                <!-- On-Screen Controls for Touch/Mobile -->
+                <div class="mt-4 grid grid-cols-3 gap-2 w-48">
+                    <div></div>
+                    <button onclick="setSnakeDir('UP')" class="bg-slate-800 p-3 rounded text-xl border border-slate-700 hover:bg-slate-700 arcade-btn">⬆️</button>
+                    <div></div>
+                    <button onclick="setSnakeDir('LEFT')" class="bg-slate-800 p-3 rounded text-xl border border-slate-700 hover:bg-slate-700 arcade-btn">⬅️</button>
+                    <button onclick="setSnakeDir('DOWN')" class="bg-slate-800 p-3 rounded text-xl border border-slate-700 hover:bg-slate-700 arcade-btn">⬇️</button>
+                    <button onclick="setSnakeDir('RIGHT')" class="bg-slate-800 p-3 rounded text-xl border border-slate-700 hover:bg-slate-700 arcade-btn">➡️</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-center py-4 text-xs text-slate-500 font-retro">
+        <p>RETRO MINI-ARCADE • BUILT WITH HTML & TAILWIND</p>
+    </footer>
+
+    <!-- Audio Synthesizer Engine (Web Audio API) -->
+    <script>
+        // Simple Audio Synthesizer to avoid relying on external audio files
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'match') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(554.37, now + 0.1);
+                osc.frequency.setValueAtTime(659.25, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'gameover') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'eat') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.setValueAtTime(600, now + 0.05);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+    </script>
+
+    <!-- Game Switcher Script -->
+    <script>
+        function switchGame(gameId) {
+            playSound('click');
+            // Hide all game sections
+            document.querySelectorAll('.game-section').forEach(sec => sec.classList.add('hidden'));
+            
+            // Deactivate all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+
+            // Show selected game section
+            document.getElementById(`game-${gameId}`).classList.remove('hidden');
+
+            // Highlight selected nav button
+            const activeBtn = document.getElementById(`nav-${gameId}`);
+            activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+            activeBtn.classList.add('bg-cyan-600', 'text-white');
+
+            // Pause Snake loop if leaving Snake game
+            if (gameId !== 'snake' && snakeInterval) {
+                clearInterval(snakeInterval);
+                snakeInterval = null;
+                document.getElementById('snake-overlay').classList.remove('hidden');
+                document.getElementById('snake-message').textContent = 'GAME PAUSED';
+            }
+        }
+    </script>
+
+    <!-- Logic: TIC-TAC-TOE -->
+    <script>
+        let tttBoard = Array(9).fill(null);
+        let tttCurrentPlayer = 'X';
+        let tttIsVSComputer = false;
+        let tttActive = true;
+        let tttScores = { X: 0, O: 0 };
+
+        const tttWinConditions = [
+            [0,1,2], [3,4,5], [6,7,8], // Rows
+            [0,3,6], [1,4,7], [2,5,8], // Columns
+            [0,4,8], [2,4,6]          // Diagonals
+        ];
+
+        function toggleTTTMode() {
+            playSound('click');
+            tttIsVSComputer = !tttIsVSComputer;
+            document.getElementById('ttt-mode-btn').textContent = tttIsVSComputer ? 'VS PVP' : 'VS AI';
+            resetTTT();
+        }
+
+        function makeTTTMove(index) {
+            if (!tttBoard[index] && tttActive) {
+                executeMove(index, tttCurrentPlayer);
+                
+                if (tttActive && tttIsVSComputer && tttCurrentPlayer === 'O') {
+                    setTimeout(makeAIMove, 300);
+                }
+            }
+        }
+
+        function executeMove(index, player) {
+            playSound('click');
+            tttBoard[index] = player;
+            const cells = document.querySelectorAll('.ttt-cell');
+            cells[index].textContent = player;
+            cells[index].classList.add(player === 'X' ? 'text-cyan-400' : 'text-pink-400');
+
+            if (checkTTTWin(player)) {
+                playSound('win');
+                document.getElementById('ttt-status').textContent = `PLAYER ${player} WINS!`;
+                tttScores[player]++;
+                updateTTTScores();
+                tttActive = false;
+                return;
+            }
+
+            if (tttBoard.every(cell => cell !== null)) {
+                document.getElementById('ttt-status').textContent = "IT'S A DRAW!";
+                tttActive = false;
+                return;
+            }
+
+            tttCurrentPlayer = tttCurrentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('ttt-status').textContent = `Player ${tttCurrentPlayer}'s Turn`;
+        }
+
+        function makeAIMove() {
+            // Simple AI: Pick random available cell
+            const emptyIndices = tttBoard.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+            if (emptyIndices.length > 0 && tttActive) {
+                const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                executeMove(randomIndex, 'O');
+            }
+        }
+
+        function checkTTTWin(player) {
+            return tttWinConditions.some(condition => {
+                return condition.every(index => tttBoard[index] === player);
+            });
+        }
+
+        function updateTTTScores() {
+            document.getElementById('ttt-score-x').textContent = tttScores.X;
+            document.getElementById('ttt-score-o').textContent = tttScores.O;
+        }
+
+        function resetTTT() {
+            playSound('click');
+            tttBoard = Array(9).fill(null);
+            tttCurrentPlayer = 'X';
+            tttActive = true;
+            document.getElementById('ttt-status').textContent = "Player X's Turn";
+            document.querySelectorAll('.ttt-cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('text-cyan-400', 'text-pink-400');
+            });
+        }
+    </script>
+
+    <!-- Logic: MEMORY MATCH -->
+    <script>
+        const memoryIcons = ['🚀', '👾', '👻', '🕹️', '🍕', '💎', '⚔️', '🍄'];
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let bestScore = localStorage.getItem('memoryBest') || null;
+
+        if (bestScore) {
+            document.getElementById('memory-best').textContent = bestScore;
+        }
+
+        function initMemoryGame() {
+            playSound('click');
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            document.getElementById('memory-moves').textContent = moves;
+            document.getElementById('memory-pairs').textContent = `0 / 8`;
+
+            // Duplicate & Shuffle Cards
+            memoryCards = [...memoryIcons, ...memoryIcons].sort(() => 0.5 - Math.random());
+
+            memoryCards.forEach((icon, index) => {
+                const card = document.createElement('div');
+                card.className = 'w-full h-20 bg-slate-900 border-2 border-cyan-500/50 rounded-lg flex items-center justify-center text-3xl cursor-pointer hover:border-cyan-400 arcade-btn transition duration-200';
+                card.dataset.index = index;
+                card.dataset.icon = icon;
+                card.textContent = '❓';
+                card.onclick = () => flipMemoryCard(card);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipMemoryCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('matched') && !flippedCards.includes(card)) {
+                playSound('click');
+                card.textContent = card.dataset.icon;
+                card.classList.add('bg-slate-800', 'border-pink-500');
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('memory-moves').textContent = moves;
+                    checkMemoryMatch();
+                }
+            }
+        }
+
+        function checkMemoryMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.icon === card2.dataset.icon) {
+                playSound('match');
+                card1.classList.add('matched', 'border-emerald-500', 'bg-emerald-950/40');
+                card2.classList.add('matched', 'border-emerald-500', 'bg-emerald-950/40');
+                matchedPairs++;
+                document.getElementById('memory-pairs').textContent = `${matchedPairs} / 8`;
+                flippedCards = [];
+
+                if (matchedPairs === 8) {
+                    playSound('win');
+                    if (!bestScore || moves < bestScore) {
+                        bestScore = moves;
+                        localStorage.setItem('memoryBest', bestScore);
+                        document.getElementById('memory-best').textContent = bestScore;
+                    }
+                    setTimeout(() => alert(`🎉 YOU WON IN ${moves} MOVES!`), 300);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.textContent = '❓';
+                    card2.textContent = '❓';
+                    card1.classList.remove('bg-slate-800', 'border-pink-500');
+                    card2.classList.remove('bg-slate-800', 'border-pink-500');
+                    flippedCards = [];
+                }, 800);
+            }
+        }
+
+        // Initialize Memory game on load
+        initMemoryGame();
+    </script>
+
+    <!-- Logic: SNAKE CLASSIC -->
+    <script>
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const gridSize = 18;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [];
+        let food = { x: 0, y: 0 };
+        let dx = gridSize;
+        let dy = 0;
+        let snakeScore = 0;
+        let snakeHighScore = localStorage.getItem('snakeHigh') || 0;
+        let snakeInterval = null;
+
+        document.getElementById('snake-high').textContent = snakeHighScore;
+
+        function startSnakeGame() {
+            playSound('click');
+            snake = [
+                { x: 5 * gridSize, y: 10 * gridSize },
+                { x: 4 * gridSize, y: 10 * gridSize },
+                { x: 3 * gridSize, y: 10 * gridSize }
+            ];
+            dx = gridSize;
+            dy = 0;
+            snakeScore = 0;
+            document.getElementById('snake-score').textContent = snakeScore;
+            spawnFood();
+
+            document.getElementById('snake-overlay').classList.add('hidden');
+
+            if (snakeInterval) clearInterval(snakeInterval);
+            snakeInterval = setInterval(updateSnake, 120);
+        }
+
+        function spawnFood() {
+            food = {
+                x: Math.floor(Math.random() * tileCount) * gridSize,
+                y: Math.floor(Math.random() * tileCount) * gridSize
+            };
+            // Prevent spawning on snake body
+            if (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+                spawnFood();
+            }
+        }
+
+        function setSnakeDir(direction) {
+            if (direction === 'UP' && dy === 0) { dx = 0; dy = -gridSize; }
+            if (direction === 'DOWN' && dy === 0) { dx = 0; dy = gridSize; }
+            if (direction === 'LEFT' && dx === 0) { dx = -gridSize; dy = 0; }
+            if (direction === 'RIGHT' && dx === 0) { dx = gridSize; dy = 0; }
+        }
+
+        // Arrow Key Listeners
+        window.addEventListener('keydown', e => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+            if (e.key === 'ArrowUp') setSnakeDir('UP');
+            if (e.key === 'ArrowDown') setSnakeDir('DOWN');
+            if (e.key === 'ArrowLeft') setSnakeDir('LEFT');
+            if (e.key === 'ArrowRight') setSnakeDir('RIGHT');
+        });
+
+        function updateSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+            // Wall Collision
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                return handleGameOver();
+            }
+
+            // Self Collision
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                return handleGameOver();
+            }
+
+            snake.unshift(head);
+
+            // Eat Food
+            if (head.x === food.x && head.y === food.y) {
+                playSound('eat');
+                snakeScore += 10;
+                document.getElementById('snake-score').textContent = snakeScore;
+                if (snakeScore > snakeHighScore) {
+                    snakeHighScore = snakeScore;
+                    localStorage.setItem('snakeHigh', snakeHighScore);
+                    document.getElementById('snake-high').textContent = snakeHighScore;
+                }
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            drawSnakeGame();
+        }
+
+        function drawSnakeGame() {
+            // Background
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Grid lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < canvas.width; i += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Draw Food
+            ctx.fillStyle = '#ec4899';
+            ctx.shadowColor = '#ec4899';
+            ctx.shadowBlur = 8;
+            ctx.fillRect(food.x + 1, food.y + 1, gridSize - 2, gridSize - 2);
+
+            // Draw Snake
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 6;
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? '#38bdf8' : '#22d3ee';
+                ctx.fillRect(segment.x + 1, segment.y + 1, gridSize - 2, gridSize - 2);
+            });
+
+            ctx.shadowBlur = 0; // Reset blur effect
+        }
+
+        function handleGameOver() {
+            playSound('gameover');
+            clearInterval(snakeInterval);
+            snakeInterval = null;
+            document.getElementById('snake-overlay').classList.remove('hidden');
+            document.getElementById('snake-message').textContent = `GAME OVER! SCORE: ${snakeScore}`;
+        }
+
+        // Initial Canvas Render
+        drawSnakeGame();
+    </script>
+</body>
+</html>
